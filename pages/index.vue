@@ -13,12 +13,11 @@ div
         class="overflow-hidden"
         :class="{'h-0': !openColorSelect}"
       )
-        client-only
-          ColorPicker(
-            :visible-formats="['rgb']",
-            :color="nowColor",
-            @color-change="updateColor"
-          )
+        ColorPicker(
+          :visible-formats="['rgb']",
+          :color="nowColor",
+          @color-change="updateColor"
+        )
   div(class="fixed flex bottom-0 left-0 right-0 p-2")
     input(
       type="file",
@@ -29,7 +28,7 @@ div
     p(
       class="flex-1 p-2 text-center cursor-pointer inline-block mt-2 rounded-md bg-slate-700 text-white"
       @click="downloadSvg()"
-    ) Download SVG
+    ) Download SVG 123
 </template>
 
 <script setup>
@@ -88,19 +87,21 @@ onMounted(async () => {
   const svgFilePath = 'test.svg';
   const response = await fetch(svgFilePath)
   const getSvgContent = await response.text();
-  const parser = new DOMParser();
-  svgDoc.value = parser.parseFromString(getSvgContent, 'image/svg+xml');
-  const styleElements = svgDoc.value.querySelectorAll('style');
-  styleElements.forEach(styleElement => {
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(styleElement.textContent);
-    Array.from(sheet.cssRules).forEach(rule => {
-      cssRules.value.push(rule);
-      colors.value.push(rule.style.fill);
+  if (getSvgContent) {
+    const parser = new DOMParser();
+    svgDoc.value = parser.parseFromString(getSvgContent, 'image/svg+xml');
+    const styleElements = svgDoc.value.querySelectorAll('style');
+    styleElements.forEach(styleElement => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(styleElement.textContent);
+      Array.from(sheet.cssRules).forEach(rule => {
+        cssRules.value.push(rule);
+        colors.value.push(rule.style.fill);
+      });
     });
-  });
-
-  svgContent.value = new XMLSerializer().serializeToString(svgDoc.value.documentElement);
+  
+    svgContent.value = new XMLSerializer().serializeToString(svgDoc.value.documentElement);
+  }
 })
 
 const convertToRgba = (color) => {
